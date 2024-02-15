@@ -2,8 +2,6 @@
 # (c) 2019 - 2020 Markus Schultheis
 # This Code is under GPL3.0
 ########################################################################################
-
-
 #include <WebSocketsServer.h>
 #include <WebSocketsClient.h>
 #include <WebSockets.h>
@@ -23,7 +21,6 @@ long entfernung=0;
 long copy_entfernung=0;
 
 uint8_t remoteIPAddress = 0;
-
 boolean authenticated = false;
 
 // Declaration for an SSD1306 display connected to I2C (SDA, SCL pins)
@@ -64,15 +61,15 @@ WebSocketsServer webSocket = WebSocketsServer(8000);
 // web server settings
 WebServer server(80);
 
-//Setup routine at begin of Program or boot up sequence
+//Setup routine at the beginning of program or boot sequence
 void setup() {
     
     Serial.begin(115200);
 
-    //make settings for display. Showing informations during setup phase
+    //make settings for display. Showing some information during setup phase
     setup_display();
 
-    // Initialize the output variables as outputs
+    // Initialize the output variables as output
     // Set RELAY to output and Inputbutton
     pinMode(output_RELAY, OUTPUT);
     digitalWrite(output_RELAY, LOW);
@@ -124,7 +121,6 @@ void setup() {
 }
 
 void loop() {
-
   digitalWrite(trigger_PIN, LOW); 
   delay(5); 
   digitalWrite(trigger_PIN, HIGH); 
@@ -150,7 +146,6 @@ void loop() {
     print_display("Abstand: " + String(get_Entfernung()) + " cm", 0, 50);
 
     webSocket.loop();                           // constantly check for websocket events
-    
 }
 
 void setup_display() {
@@ -201,8 +196,6 @@ void check_input() {
         pressed_button();
     }
 }
-
-
 
 void handle_OnConnect() {
     RELAYstatus = LOW;
@@ -322,7 +315,7 @@ void webSocketEvent(uint8_t num,
 }
 
 long get_Entfernung() {
-// Wenn kleiner als 15 cm dann ist die Garage offen
+// Berechnung der Entfernung eines Objekts zum Sensor
   dauer = pulseIn(echo_PIN, HIGH); 
   entfernung = (dauer/2) * 0.03432;
   copy_entfernung = entfernung;
@@ -332,6 +325,7 @@ long get_Entfernung() {
   
   if (copy_entfernung!=entfernung){
     
+// Wenn Objektabstand kleiner als 15 cm -> Garage offen
     Serial.println(copy_entfernung + ", " + entfernung);
     webSocket.sendTXT(remoteIPAddress, "Abstand: " + distance + " in cm");
     if (entfernung >= 15) {
